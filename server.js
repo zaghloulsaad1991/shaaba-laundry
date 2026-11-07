@@ -11,7 +11,7 @@ let webpush = null;
 try { webpush = require('web-push'); } catch (e) { /* push disabled if library missing */ }
 
 const PORT = process.env.PORT || 3000;
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.VERCEL ? '/tmp/shaaba-data' : path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -1975,7 +1975,11 @@ const server = http.createServer(async (req, res) => {
   return serveFile(res, filePath, extra);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Shaaba Laundry System running at http://localhost:${PORT}`);
-  console.log(`Push notifications: ${webpush ? 'enabled' : 'disabled (web-push not installed)'}`);
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Shaaba Laundry System running at http://localhost:${PORT}`);
+    console.log(`Push notifications: ${webpush ? 'enabled' : 'disabled (web-push not installed)'}`);
+  });
+}
+
+module.exports = (req, res) => server.emit('request', req, res);
