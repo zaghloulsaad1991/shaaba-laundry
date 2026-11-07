@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بوابة الدفع الإلكتروني | مغاسل سحابة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body { background: #0f172a; color: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .pay-card { background: #fff; max-width: 450px; width: 100%; border-radius: 24px; padding: 28px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 800; margin-bottom: 12px; }
+    .amount-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; margin: 16px 0; }
+    .amount-box .num { font-size: 30px; font-weight: 900; color: #0369a1; }
+    .methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .method-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #fff; cursor: pointer; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .method-btn.active { border-color: #0284c7; background: #e0f2fe; color: #0369a1; }
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-pay { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+    .btn-fail { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="pay-card">
+    <span class="badge"><i class="fa-solid fa-flask"></i> بوابة الدفع التجريبية (Sandbox)</span>
+    <h2 style="font-size:20px; font-weight:900;">مغاسل سحابة | Shaaba.sa</h2>
+    <p style="font-size:13px; color:#64748b;">يمكنك من لوحة الإدارة التبديل في أي وقت للربط الحي مع (Moyasar أو Tap أو PayTabs)</p>
+
+    <div class="amount-box">
+      <div style="font-size:12px; color:#64748b;" id="payPurpose">قيمة العملية الشاملة للضريبة</div>
+      <div class="num" id="payAmount">... ر.س</div>
+    </div>
+
+    <div class="methods">
+      <button type="button" class="method-btn active" onclick="pick(this)"><i class="fa-brands fa-apple" style="font-size:18px;"></i> Apple Pay</button>
+      <button type="button" class="method-btn" onclick="pick(this)"><i class="fa-solid fa-credit-card"></i> مدى Mada</button>
+      <button type="button" class="method-btn" onclick="pick(this)"><i class="fa-brands fa-cc-visa"></i> Visa / Master</button>
+      <button type="button" class="method-btn" onclick="pick(this)"><i class="fa-solid fa-mobile-screen"></i> STC Pay</button>
+    </div>
+
+    <button class="btn btn-pay" onclick="finish('paid')">
+      <i class="fa-solid fa-lock"></i> تأكيد الدفع بنجاح الآن
+    </button>
+    <button class="btn btn-fail" onclick="finish('failed')">
+      <i class="fa-solid fa-xmark"></i> محاكاة إلغاء / فشل الدفع
+    </button>
+  </div>
+
+  <script>
+    const pid = new URLSearchParams(location.search).get('pid');
+    function pick(el) {
+      document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    async function load() {
+      if (!pid) return;
+      const r = await fetch('/api/payments/' + encodeURIComponent(pid));
+      const d = await r.json();
+      if (d.amount) {
+        document.getElementById('payAmount').textContent = d.amount + ' ر.س';
+        document.getElementById('payPurpose').textContent =
+          d.purpose === 'subscription' ? 'اشتراك باقة شهرية - مغاسل سحابة' :
+          d.purpose === 'balance' ? 'سداد فرق الوزن / المبلغ المتبقي' : 'سداد طلب غسيل - مغاسل سحابة';
+      }
+    }
+    async function finish(result) {
+      await fetch('/api/payments/' + encodeURIComponent(pid) + '/sandbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result })
+      });
+      location.href = '/pay/return?pid=' + encodeURIComponent(pid);
+    }
+    load();
+  </script>
+</body>
+</html>

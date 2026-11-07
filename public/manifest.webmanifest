@@ -1,0 +1,21 @@
+{
+  "name": "مغاسل سحابة | Shaaba Laundry",
+  "short_name": "مغاسل سحابة",
+  "description": "تطبيق مغاسل سحابة بالدمام والخبر - باقات الكيلو والاشتراكات الشهرية وغسيل السجاد مع التوصيل المجاني",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0369a1",
+  "theme_color": "#0284c7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
